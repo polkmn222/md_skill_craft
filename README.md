@@ -5,6 +5,21 @@
 **Mode 1:** Project description → Auto-generate CLAUDE.md / AGENT.md / GEMINI.md  
 **Mode 2:** Analyze existing projects → Validate and improve configuration files
 
+**Languages:** 🇬🇧 English | 🇰🇷 한국어 (Fully localized UI)
+
+---
+
+## ✨ Features
+
+- **Multi-LLM Support:** Claude, OpenAI GPT, Google Gemini
+- **Bilingual Interface:** Full English and Korean localization (한국어 완벽 지원)
+- **Two Operating Modes:**
+  - Mode 1: Generate configuration files from project descriptions
+  - Mode 2: Analyze and validate existing configuration files
+- **Secure API Key Management:** Automatic OS keychain integration
+- **Comprehensive Testing:** 20+ unit tests with 100% pass rate
+- **Interactive REPL:** User-friendly command interface
+
 ---
 
 ## 🚀 Installation
@@ -105,9 +120,13 @@ md_skill_craft/
 │   ├── cli.py              # REPL loop and command dispatcher
 │   ├── core/               # LLM provider abstraction
 │   ├── modes/              # Mode 1 and Mode 2 implementations
-│   ├── config/             # Settings and API key management
+│   ├── config/             
+│   │   ├── settings.py     # Settings management
+│   │   ├── keystore.py     # Secure API key storage
+│   │   └── localization.py # Multi-language support (EN/KO)
 │   └── ui/                 # Terminal UI components
-├── tests/                  # Unit tests (58+ tests)
+├── tests/                  # Unit tests (20+ comprehensive tests)
+│   └── test_localization.py # Localization module tests
 ├── samples/                # Example configuration files
 │   ├── CLAUDE.md.sample
 │   ├── AGENT.md.sample
