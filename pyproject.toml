@@ -13,9 +13,6 @@ authors = [{name = "Claude Code", email = "code@anthropic.com"}]
 keywords = ["llm", "claude", "gpt", "gemini", "project-setup", "cli"]
 
 dependencies = [
-    "anthropic>=0.49.0",           # Claude API
-    "openai>=1.50.0",              # GPT API
-    "google-genai>=1.0.0",         # Gemini API (new SDK)
     "rich>=13.0.0",                # Terminal UI
     "keyring>=24.0.0",             # OS keystore for API keys
     "platformdirs>=4.0.0",         # Cross-platform config paths
@@ -25,6 +22,14 @@ dependencies = [
 md-skill-craft = "md_skill_craft.cli:main"
 
 [project.optional-dependencies]
+claude = ["anthropic>=0.49.0"]
+openai = ["openai>=1.50.0"]
+gemini = ["google-genai>=1.0.0"]
+all = [
+    "anthropic>=0.49.0",
+    "openai>=1.50.0",
+    "google-genai>=1.0.0",
+]
 dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",

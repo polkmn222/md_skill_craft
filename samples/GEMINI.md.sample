@@ -1,8 +1,15 @@
+# 📝 GEMINI.md 샘플
+
+> Google Gemini 프로젝트의 설정 파일 예시입니다.
+> 이렇게 작성하면 됩니다! ✅
+
+---
+
 # [PROJECT_NAME]
 
 ## Project
-[One-line project description for OpenAI Agents]
-Supported: OpenAI GPT models (GPT-4, GPT-4o, etc.)
+[One-line project description for Google Gemini]
+Supported: Google Gemini models (Gemini 2.0, etc.)
 
 ## Setup
 1. Copy `.env.example` → `.env` and add API keys
@@ -20,8 +27,8 @@ Supported: OpenAI GPT models (GPT-4, GPT-4o, etc.)
 
 ## Architecture
 - `src/` — Main source code
-- `agents/` — OpenAI Agent definitions
-- `tools/` — Tool definitions for agents
+- `models/` — Gemini model definitions
+- `functions/` — Tool definitions for Gemini
 - `config/` — Configuration management
 - `tests/` — Test suite
 
@@ -29,8 +36,8 @@ Supported: OpenAI GPT models (GPT-4, GPT-4o, etc.)
 - Type hints required on all functions
 - Google-style docstrings
 - Never commit `.env` file
-- Agent functions must be pure and testable
-- All agents implement defined interface
+- Tool functions must be pure and testable
+- All functions implement defined interface
 
 ## Dependencies
 See `pyproject.toml` [project.dependencies]. Dev tools: ruff (lint/format), mypy (types), pytest.
