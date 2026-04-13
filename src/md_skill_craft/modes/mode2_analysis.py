@@ -155,6 +155,93 @@ class Mode2Analysis:
         }
         return file_map.get(self.llm_provider, "CLAUDE")
 
+    def _find_samples_dir(self) -> Optional[Path]:
+        """Find samples directory in the project.
+
+        Search order:
+        1. {package_root}/samples/
+        2. {cwd}/samples/
+        3. {cwd}/../samples/
+        4. MD_SKILL_CRAFT_SAMPLES environment variable
+
+        Returns:
+            Path to samples directory or None if not found
+        """
+        # Check environment variable first
+        env_samples = os.getenv("MD_SKILL_CRAFT_SAMPLES")
+        if env_samples:
+            env_path = Path(env_samples)
+            if env_path.is_dir():
+                return env_path
+
+        # Check relative to this file's location
+        package_root = Path(__file__).parent.parent.parent.parent
+        for candidate in [
+            package_root / "samples",
+            Path.cwd() / "samples",
+            Path.cwd().parent / "samples",
+        ]:
+            if candidate.is_dir():
+                return candidate
+
+        return None
+
+    def _read_sample_guide(self) -> Optional[str]:
+        """Read the sample configuration file for the current LLM provider.
+
+        Returns:
+            Content of AGENT.md / CLAUDE.md / GEMINI.md, or None if not found
+        """
+        samples_dir = self._find_samples_dir()
+        if not samples_dir:
+            return None
+
+        file_type = self._get_file_type()
+        sample_file = samples_dir / f"{file_type}.md"
+
+        if sample_file.exists():
+            try:
+                return sample_file.read_text(encoding="utf-8")
+            except Exception:
+                return None
+
+        return None
+
+    def _read_skill_guides(self) -> str:
+        """Read skill guide files from samples/skills/ directory.
+
+        Returns:
+            Summary of key skill guides (harness.md + coding-standards.md)
+        """
+        samples_dir = self._find_samples_dir()
+        if not samples_dir:
+            return ""
+
+        guides = []
+
+        # Read harness.md (최대 200줄)
+        harness_file = samples_dir / "skills" / "harness.md"
+        if harness_file.exists():
+            try:
+                content = harness_file.read_text(encoding="utf-8")
+                lines = content.split("\n")[:200]
+                guides.append("## Guide: CLAUDE.md/AGENT.md Best Practices\n" + "\n".join(lines))
+            except Exception:
+                pass
+
+        # Read coding-standards.md (최대 200줄)
+        coding_file = samples_dir / "skills" / "coding-standards.md"
+        if coding_file.exists():
+            try:
+                content = coding_file.read_text(encoding="utf-8")
+                lines = content.split("\n")[:200]
+                guides.append("## Guide: Coding Standards\n" + "\n".join(lines))
+            except Exception:
+                pass
+
+        return "\n\n".join(guides)
+
+
     def select_analysis_depth(self) -> str:
         """Let user select analysis depth.
 
@@ -209,6 +296,7 @@ class Mode2Analysis:
             with progress_bar(progress_desc) as (progress, task_id):
                 config = LLMConfig(
                     model=self.llm_model,
+                    max_tokens=4096,
                     system_prompt=system_prompt,
                     temperature=0.7,
                 )
@@ -241,13 +329,27 @@ class Mode2Analysis:
         Returns:
             System prompt string
         """
+        # Get sample guide content
+        sample_guide = self._read_sample_guide()
+        skill_guides = self._read_skill_guides()
+        
+        sample_section = f"""## 올바른 설정 파일 예시
+{sample_guide}""" if sample_guide else ""
+        
+        skills_section = f"""## 평가 기준 (Best Practices)
+{skill_guides}""" if skill_guides else ""
+
         if self.language == "ko":
-            return """당신은 프로젝트 구조 분석 전문가입니다.
+            return f"""당신은 {self._get_file_type()}.md 파일 분석 전문가입니다.
+
+{sample_section}
+
+{skills_section}
 
 사용자의 프로젝트를 분석하고 다음을 평가해주세요:
-1. 기존 CLAUDE.md/AGENT.md/GEMINI.md 파일의 정확성
-2. 누락된 정보 (Key Commands, Architecture 등)
-3. 실제 프로젝트 구조와의 불일치
+1. 위 예시 파일과 비교했을 때 구조의 정확성
+2. 누락된 정보 (Key Commands, Architecture, Dependencies 등)
+3. 실제 프로젝트 구조와의 일치도
 4. 개선 권고사항
 
 출력 형식:
@@ -260,16 +362,20 @@ class Mode2Analysis:
 - [개선사항 2]
 
 ## 개선된 설정 파일
-[전체 CLAUDE.md/AGENT.md/GEMINI.md 내용]
+[전체 {self._get_file_type()}.md 내용]
 
 정확하고 실용적인 분석만 제공하세요."""
         else:
-            return """You are a project structure analysis expert.
+            return f"""You are a {self._get_file_type()}.md file analysis expert.
+
+{sample_section}
+
+{skills_section}
 
 Analyze the user's project and evaluate:
-1. Accuracy of existing CLAUDE.md/AGENT.md/GEMINI.md file
-2. Missing information (Key Commands, Architecture, etc.)
-3. Mismatch between actual structure and documented structure
+1. Accuracy of structure compared to the above example file
+2. Missing information (Key Commands, Architecture, Dependencies, etc.)
+3. Alignment between actual project structure and documentation
 4. Recommendations for improvement
 
 Output format:
@@ -282,7 +388,7 @@ Output format:
 - [Improvement 2]
 
 ## Improved Configuration File
-[Complete CLAUDE.md/AGENT.md/GEMINI.md content]
+[Complete {self._get_file_type()}.md content]
 
 Provide only accurate, practical analysis."""
 
@@ -317,7 +423,11 @@ Provide only accurate, practical analysis."""
 
 {config_section}
 
-이 프로젝트를 분석하고 설정 파일을 검증해주세요.
+위 샘플 예시와 비교하여 다음을 분석해주세요:
+- 누락된 섹션 (Key Commands, Architecture 등)
+- 개선이 필요한 항목
+- 제안된 완전한 설정 파일
+
 마크다운 형식으로 분석 결과를 출력하세요."""
         else:
             config_section = f"""## Existing Configuration File
@@ -334,7 +444,11 @@ Provide only accurate, practical analysis."""
 
 {config_section}
 
-Analyze this project and validate the configuration file.
+Compare with the sample example above and analyze:
+- Missing sections (Key Commands, Architecture, etc.)
+- Areas needing improvement
+- Suggested complete configuration file
+
 Output analysis results in markdown format."""
 
     def save_analysis(self, root_path: Path) -> bool:
