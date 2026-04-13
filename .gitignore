@@ -3,6 +3,7 @@ tests/
 samples/skills/
 samples/prompts/
 task/
+backups/
 
 # Build and packaging
 *.egg-info/
@@ -43,3 +44,4 @@ htmlcov/
 .env
 .env.local
 .env.*.local
+.claude

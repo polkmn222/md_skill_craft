@@ -24,8 +24,10 @@ md-skill-craft
 
 ### 2️⃣ OpenAI (GPT)
 ```bash
+git clone https://github.com/polkmn222/md_skill_craft.git
 cd md_skill_craft
-bash setup.sh
+bash setup.sh  # macOS/Linux
+# or setup.bat  # Windows
 
 pip install -e ".[openai]"
 md-skill-craft
@@ -33,8 +35,10 @@ md-skill-craft
 
 ### 3️⃣ Google Gemini
 ```bash
+git clone https://github.com/polkmn222/md_skill_craft.git
 cd md_skill_craft
-bash setup.sh
+bash setup.sh  # macOS/Linux
+# or setup.bat  # Windows
 
 pip install -e ".[gemini]"
 md-skill-craft
@@ -42,8 +46,10 @@ md-skill-craft
 
 ### 4️⃣ All LLM Providers (Claude + OpenAI + Gemini)
 ```bash
+git clone https://github.com/polkmn222/md_skill_craft.git
 cd md_skill_craft
-bash setup.sh
+bash setup.sh  # macOS/Linux
+# or setup.bat  # Windows
 
 pip install -e ".[all]"
 md-skill-craft
