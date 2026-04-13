@@ -7,14 +7,21 @@ License: MIT
 Project-URL: Repository, https://github.com/anthropics/claude-code-trainer
 Project-URL: Issues, https://github.com/anthropics/claude-code-trainer/issues
 Keywords: llm,claude,gpt,gemini,project-setup,cli
-Requires-Python: >=3.11
+Requires-Python: >=3.12
 Description-Content-Type: text/markdown
-Requires-Dist: anthropic>=0.49.0
-Requires-Dist: openai>=1.50.0
-Requires-Dist: google-genai>=1.0.0
 Requires-Dist: rich>=13.0.0
 Requires-Dist: keyring>=24.0.0
 Requires-Dist: platformdirs>=4.0.0
+Provides-Extra: claude
+Requires-Dist: anthropic>=0.49.0; extra == "claude"
+Provides-Extra: openai
+Requires-Dist: openai>=1.50.0; extra == "openai"
+Provides-Extra: gemini
+Requires-Dist: google-genai>=1.0.0; extra == "gemini"
+Provides-Extra: all
+Requires-Dist: anthropic>=0.49.0; extra == "all"
+Requires-Dist: openai>=1.50.0; extra == "all"
+Requires-Dist: google-genai>=1.0.0; extra == "all"
 Provides-Extra: dev
 Requires-Dist: pytest>=8.0.0; extra == "dev"
 Requires-Dist: pytest-asyncio>=0.23.0; extra == "dev"
@@ -25,213 +32,165 @@ Requires-Dist: types-python-dateutil; extra == "dev"
 
 # md-skill-craft
 
-> Interactive CLI for generating and validating LLM-specific project configuration files
+> Auto-generate project configuration files with LLMs
 
-Generate **CLAUDE.md**, **AGENT.md**, or **GEMINI.md** for your projects through interactive conversations with Claude, GPT, or Gemini APIs.
+**Mode 1:** Project description → Auto-generate CLAUDE.md / AGENT.md / GEMINI.md  
+**Mode 2:** Analyze existing projects → Validate and improve configuration files
 
-## ✨ Features
+---
 
-- **Mode 1: Interactive Guide Generation** — Describe your project, LLM generates configuration file
-- **Mode 2: Project Analysis** — Analyze existing code, validate/improve configuration file
-- **Multi-LLM Support** — Claude, GPT, Gemini with unified abstraction layer
-- **Secure API Key Storage** — OS-level keychain integration (macOS/Windows/Linux)
-- **Bilingual** — Korean and English support
-- **Cost Tracking** — Monitor API token usage and estimated costs
-- **Cross-platform** — Works on macOS, Windows, Linux
+## 🚀 Installation
 
-## 🚀 Quick Start
+Choose the LLM provider you want to use:
 
-### Installation
+### 1️⃣ Claude (Anthropic)
 ```bash
-# Clone repository
-git clone https://github.com/anthropics/claude-code-trainer
-cd claude-code-trainer
+git clone https://github.com/polkmn222/md_skill_craft.git
+cd md_skill_craft
+bash setup.sh  # macOS/Linux
+# or setup.bat  # Windows
 
-# Install
-pip install -e .
-# or
-pip install -r requirements.txt
-
-# Verify
-md-skill-craft --version
-```
-
-### First Run
-```bash
+pip install -e ".[claude]"
 md-skill-craft
 ```
 
-The CLI opens an interactive REPL with automatic onboarding:
-1. **Language** — Choose Korean or English
-2. **LLM** — Select Claude, GPT, or Gemini
-3. **API Key** — Auto-detect env var or securely store in keychain
-4. **Mode** — Choose between generating new configs or analyzing existing projects
+### 2️⃣ OpenAI (GPT)
+```bash
+cd md_skill_craft
+bash setup.sh
 
-### Generate Configuration (Mode 1)
+pip install -e ".[openai]"
+md-skill-craft
+```
+
+### 3️⃣ Google Gemini
+```bash
+cd md_skill_craft
+bash setup.sh
+
+pip install -e ".[gemini]"
+md-skill-craft
+```
+
+### 4️⃣ All LLM Providers (Claude + OpenAI + Gemini)
+```bash
+cd md_skill_craft
+bash setup.sh
+
+pip install -e ".[all]"
+md-skill-craft
+```
+
+---
+
+## 📋 Commands
+
+Available in the REPL:
+
+| Command | Description |
+|---------|-------------|
+| `/help` | Show help and current settings |
+| `/setup` | Change settings (language, LLM, API key, mode) |
+| `/cost` | Display API usage and costs |
+| `/mode` | Switch between Mode 1 and Mode 2 |
+| `/exit` | Exit the program |
+
+---
+
+## 🎯 Usage Examples
+
+### Mode 1: Generate Configuration Files
 ```
 md-skill-craft > (press enter)
 
 Describe your project:
-> FastAPI REST API with PostgreSQL, deployed on AWS
+> FastAPI REST API with PostgreSQL database
 
-[LLM analyzes and generates CLAUDE.md]
+[LLM generates CLAUDE.md automatically]
 
-Options:
+Save?
   [1] Save to CLAUDE.md
   [2] Save as CLAUDE.md.suggested (preview)
   [3] Continue editing
   [4] Skip
 ```
 
-### Analyze Project (Mode 2)
+### Mode 2: Analyze Existing Projects
 ```
 md-skill-craft > (press enter)
 
 Select analysis depth:
-  [1] Fast — README, config files
-  [2] Standard — Top-level structure
+  [1] Fast — README and config files only
+  [2] Standard — Top-level source structure
   [3] Deep — All source files
 
-[LLM scans and validates your existing CLAUDE.md]
+[LLM validates existing CLAUDE.md and suggests improvements]
 ```
 
-## 📋 Commands
+---
 
-Within the REPL:
-
-| Command | Description |
-|---------|-------------|
-| `/help` | Show available commands and current settings |
-| `/setup` | Change language, LLM, API key, or mode |
-| `/cost` | Display API usage and estimated costs |
-| `/mode` | Switch between Mode 1 and Mode 2 |
-| `/exit` | Quit the program |
-
-Empty input or text → runs current mode (1 or 2)
-
-## 🏗️ Project Structure
+## 📁 Project Structure
 
 ```
-md-skill-craft/
-├── src/md_skill_craft/
-│   ├── cli.py              # REPL loop + command dispatch
+md_skill_craft/
+├── src/md_skill_craft/     # Core application code
+│   ├── cli.py              # REPL loop and command dispatcher
 │   ├── core/               # LLM provider abstraction
-│   │   ├── base_provider.py
-│   │   ├── provider_factory.py
-│   │   ├── anthropic_provider.py
-│   │   ├── openai_provider.py
-│   │   └── google_provider.py
-│   ├── modes/
-│   │   ├── mode1_guide.py  # Interactive guide generation
-│   │   └── mode2_analysis.py  # Project analysis
-│   ├── config/
-│   │   ├── settings.py     # Config management
-│   │   ├── keystore.py     # API key storage
-│   │   └── pricing.py      # Cost calculation
-│   └── ui/                 # Terminal UI (Rich)
-├── tests/                  # 82 unit tests
-├── skills/                 # Documentation & templates
-├── CLAUDE.md              # Project guidelines
-└── pyproject.toml         # Package configuration
+│   ├── modes/              # Mode 1 and Mode 2 implementations
+│   ├── config/             # Settings and API key management
+│   └── ui/                 # Terminal UI components
+├── tests/                  # Unit tests (58+ tests)
+├── samples/                # Example configuration files
+│   ├── CLAUDE.md.sample
+│   ├── AGENT.md.sample
+│   └── GEMINI.md.sample
+├── README.md               # This file
+└── pyproject.toml          # Package configuration
 ```
 
-## 🔧 Development
+---
 
-### Setup
-```bash
-pip install -e ".[dev]"
-```
+## ⚙️ Development
 
-### Tests
+### Run Tests
 ```bash
-pytest tests/ -v              # Run all tests
-pytest tests/test_mode1_guide.py  # Test specific module
-pytest tests/test_cli.py -k test_help  # Test specific test
+pytest tests/ -v
 ```
 
 ### Code Quality
 ```bash
-ruff check src/               # Lint
-ruff format src/              # Auto-format
-mypy src/                     # Type checking
+ruff check src/          # Lint
+ruff format src/         # Format code
+mypy src/               # Type checking
 ```
-
-### Build & Release
-```bash
-pip install build twine
-python -m build
-twine upload dist/*
-```
-
-## 🔐 Configuration
-
-### API Keys
-Automatically detected in this order:
-1. OS keychain (macOS Keychain, Windows Credential Manager, Linux libsecret)
-2. Environment variables: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY`
-3. User prompt for secure storage
-
-### Config Location
-- **macOS/Linux:** `~/.config/md-skill-craft/`
-- **Windows:** `C:\Users\<user>\AppData\Roaming\md-skill-craft\`
-
-## 📊 Cost Tracking
-
-Use `/cost` to see API usage:
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 API Usage & Cost
-━━━━━━━━━━━━━━━━━━━━━━━━━
-Claude (claude-haiku-4-5-20251001)
-  Input:  45,230 tokens → $0.036
-  Output: 12,450 tokens → $0.050
-  Subtotal: $0.086
-
-GPT (gpt-4o-mini)
-  Input:  23,100 tokens → $0.003
-  Output:  5,670 tokens → $0.003
-  Subtotal: $0.006
-─────────────────────────
-Total: $0.092
-```
-
-## 🧠 LLM-Specific Config Files
-
-Each LLM has a unique configuration format:
-
-- **CLAUDE.md** — Claude Code project guidelines
-- **AGENT.md** — OpenAI Agents configuration
-- **GEMINI.md** — Google Gemini project setup
-
-Each file documents:
-- Project overview and tech stack
-- Setup instructions
-- Key commands (dev, test, lint, format, deploy)
-- Architecture diagram or description
-- Coding conventions
-- Dependencies and skills
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing`)
-3. Add tests for new functionality
-4. Run `ruff check`, `mypy`, and `pytest` locally
-5. Commit with clear messages
-6. Push and open Pull Request
-
-## 📝 License
-
-MIT License — See LICENSE file for details
-
-## 🔗 Links
-
-- [GitHub Repository](https://github.com/anthropics/claude-code-trainer)
-- [Issue Tracker](https://github.com/anthropics/claude-code-trainer/issues)
-- [Claude API Docs](https://docs.anthropic.com)
-- [OpenAI API Docs](https://platform.openai.com/docs)
-- [Google Gemini Docs](https://ai.google.dev)
 
 ---
 
-**Built with ❤️ by Claude Code**
+## 🔐 API Key Setup
+
+Auto-detection order:
+1. OS Keychain (macOS/Windows/Linux)
+2. Environment variables: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY`
+3. User input (securely stored)
+
+---
+
+## 📝 Sample Configuration Files
+
+See the `samples/` folder for example project configurations:
+- `CLAUDE.md.sample` — Claude project example
+- `AGENT.md.sample` — OpenAI Agents example
+- `GEMINI.md.sample` — Google Gemini example
+
+---
+
+## 🔗 Links
+
+- [GitHub Repository](https://github.com/polkmn222/md_skill_craft)
+- [Claude API Documentation](https://docs.anthropic.com)
+- [OpenAI API Documentation](https://platform.openai.com/docs)
+- [Google Gemini Documentation](https://ai.google.dev)
+
+---
+
+**Requirements:** Python 3.12+

@@ -8,6 +8,3 @@ src/md_skill_craft.egg-info/dependency_links.txt
 src/md_skill_craft.egg-info/entry_points.txt
 src/md_skill_craft.egg-info/requires.txt
 src/md_skill_craft.egg-info/top_level.txt
-tests/test_cli.py
-tests/test_mode1_guide.py
-tests/test_mode2_analysis.py

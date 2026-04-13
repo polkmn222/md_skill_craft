@@ -7,6 +7,7 @@ from typing import Optional
 
 from md_skill_craft.config.settings import settings, usage_tracker
 from md_skill_craft.config.keystore import KeyStore
+from md_skill_craft.config.localization import get_string as t
 from md_skill_craft.core.provider_factory import ProviderFactory
 from md_skill_craft.modes.mode1_guide import Mode1Guide
 from md_skill_craft.modes.mode2_analysis import Mode2Analysis
@@ -72,7 +73,7 @@ def get_api_key(provider: str, use_env: bool = True) -> str:
         choice = Menu.select(
             "Use this API key?",
             options=[
-                (1, "Stored 키 사용"),
+                (1, "Use stored key"),
                 (2, "Enter new key (encrypted)"),
             ],
         )
@@ -100,20 +101,21 @@ def run_onboarding() -> None:
     print_info("First run setup\n")
 
     # Step 1: Language
-    print_section("[1/4] Language 선택")
+    print_section(t("section.language_select", "en"))
     lang_choice = Menu.select(
-        "Select language:",
+        t("prompt.select_language", "en"),
         options=[
             (1, "Korean"),
             (2, "English"),
         ],
     )
     settings.language = "ko" if lang_choice == 1 else "en"
+    lang = settings.language
 
     # Step 2: LLM Provider
-    print_section("[2/4] LLM 도구 선택")
+    print_section(t("section.llm_select", lang))
     llm_choice = Menu.select(
-        "Which LLM provider?",
+        t("prompt.select_llm", lang),
         options=[
             (1, "Claude (Anthropic)", "CLAUDE.md"),
             (2, "GPT / Codex (OpenAI)", "AGENT.md"),
@@ -126,7 +128,7 @@ def run_onboarding() -> None:
     settings.llm = selected_llm
 
     # Step 3: API Key
-    print_section("[3/4] API 키 설정")
+    print_section(t("section.api_key", lang))
     api_key = get_api_key(selected_llm, use_env=True)
     settings.use_env_var = True  # Remember user prefers env vars
 
@@ -136,43 +138,44 @@ def run_onboarding() -> None:
     settings.llm_model = default_model
 
     # Step 4: Mode
-    print_section("[4/4] Select mode:")
+    print_section(t("section.select_mode", lang))
     mode_choice = Menu.select(
-        "어떤 목적으로 사용할까요?",
+        t("prompt.select_mode_purpose", lang),
         options=[
-            (1, "New project", "Generate config files interactively"),
-            (2, "Analyze project", "Validate project configuration"),
+            (1, t("mode.generate_guide", lang), t("mode.generate_guide_description", lang)),
+            (2, t("mode.analyze_project", lang), t("mode.analyze_project_description", lang)),
         ],
     )
     settings.mode = mode_choice
 
     # Step 4-B: Mode 2 additional question
     if mode_choice == 2:
-        print_section("Intervention method (Mode 2):")
+        print_section(t("section.intervention_method", lang))
         active_choice = Menu.select(
-            "Select intervention:",
+            t("prompt.select_intervention", lang),
             options=[
-                (1, "Active", "Auto-apply suggestions"),
-                (2, "Passive", "Show suggestions only"),
+                (1, t("intervention.active", lang), t("intervention.active_description", lang)),
+                (2, t("intervention.passive", lang), t("intervention.passive_description", lang)),
             ],
         )
         settings.active_mode = active_choice == 1
 
     # Save settings
     settings.save()
-    print_success("✅ Settings saved! (Use /setup to change anytime)")
+    print_success(t("success.settings_saved", lang))
 
 
 def show_help() -> None:
     """Show help information."""
+    lang = settings.language or "en"
     print_header("md-skill-craft Help")
 
     print_section("Built-in Commands")
-    print_option(1, "/help", "Help 표시")
-    print_option(2, "/setup", "Change or view settings")
-    print_option(3, "/cost", "View API usage and costs")
-    print_option(4, "/mode", "Switch mode (1 ↔ 2)")
-    print_option(5, "/exit", "Exit program")
+    print_option(1, "/help", t("help.help_command", lang))
+    print_option(2, "/setup", t("help.setup_command", lang))
+    print_option(3, "/cost", t("help.cost_command", lang))
+    print_option(4, "/mode", t("help.mode_command", lang))
+    print_option(5, "/exit", t("help.exit_command", lang))
 
     print_section("Current Settings")
     print_info(f"Language: {settings.language}")
@@ -187,6 +190,7 @@ def show_help() -> None:
 def show_cost() -> None:
     """Show API usage and costs."""
     from md_skill_craft.config.pricing import calculate_cost
+    lang = settings.language or "en"
 
     print_header("API Usage and Costs")
 
@@ -215,45 +219,53 @@ def show_cost() -> None:
                 provider, provider
             )
             print_info(f"{provider_name} ({settings_model})")
-            print_info(f"  입력: {input_tokens:,} 토큰 → ${cost * input_tokens / (input_tokens + output_tokens + 1):.3f}")
-            print_info(f"  출력: {output_tokens:,} 토큰 → ${cost * output_tokens / (input_tokens + output_tokens + 1):.3f}")
-            print_info(f"  소계: ${cost:.3f}")
+            input_cost = cost * input_tokens / (input_tokens + output_tokens + 1)
+            output_cost = cost * output_tokens / (input_tokens + output_tokens + 1)
+            input_label = "입력" if lang == "ko" else "Input"
+            output_label = "출력" if lang == "ko" else "Output"
+            subtotal_label = "소계" if lang == "ko" else "Subtotal"
+            print_info(f"  {input_label}: {input_tokens:,} tokens → ${input_cost:.3f}")
+            print_info(f"  {output_label}: {output_tokens:,} tokens → ${output_cost:.3f}")
+            print_info(f"  {subtotal_label}: ${cost:.3f}")
             print_info("")
 
-    print_section("Total")
+    print_section("Total" if lang == "en" else "총합")
     print_info(f"Total cost: ${total_cost:.3f}")
     print_info("[dim][Prices as of April 2025, actual billing may vary][/dim]")
 
 
 def show_setup() -> None:
     """Show setup menu to change settings."""
+    lang = settings.language or "en"
     print_header("Settings")
 
+    mode2_desc = t("menu.mode2_only", lang) if settings.mode == 2 else ""
     choice = Menu.select(
-        "Select what to change:",
+        t("menu.select_to_change", lang),
         options=[
-            (1, "Language"),
-            (2, "LLM & API Key"),
-            (3, "Mode (1 ↔ 2)"),
-            (4, "Intervention", "(Mode 2 only)" if settings.mode == 2 else ""),
-            (5, "Back"),
+            (1, t("menu.option_language", lang)),
+            (2, t("menu.option_llm", lang)),
+            (3, t("menu.option_mode", lang)),
+            (4, t("menu.option_intervention", lang), mode2_desc),
+            (5, t("menu.back", lang)),
         ],
     )
 
     if choice == 1:
         lang_choice = Menu.select(
-            "Language를 선택하세요:",
+            t("prompt.change_language", lang),
             options=[
                 (1, "Korean"),
                 (2, "English"),
             ],
         )
         settings.language = "ko" if lang_choice == 1 else "en"
-        print_success("Language가 변경되었습니다.")
+        new_lang = settings.language
+        print_success(t("success.language_changed", new_lang))
 
     elif choice == 2:
         llm_choice = Menu.select(
-            "Select LLM:",
+            t("prompt.change_llm", lang),
             options=[
                 (1, "Claude (Anthropic)"),
                 (2, "GPT / Codex (OpenAI)"),
@@ -266,29 +278,29 @@ def show_setup() -> None:
         settings.llm = new_llm
         provider = ProviderFactory.create(new_llm, api_key)
         settings.llm_model = provider.available_models[0] if provider.available_models else "unknown"
-        print_success(f"LLM: {new_llm.upper()}selected")
+        print_success(t("success.llm_changed", lang))
 
     elif choice == 3:
         mode_choice = Menu.select(
-            "Select mode:",
+            t("prompt.change_mode", lang),
             options=[
-                (1, "New project"),
-                (2, "Analyze project"),
+                (1, t("mode.generate_guide", lang)),
+                (2, t("mode.analyze_project", lang)),
             ],
         )
         settings.mode = mode_choice
-        print_success(f"Mode: {mode_choice}selected")
+        print_success(t("success.mode_changed", lang))
 
     elif choice == 4 and settings.mode == 2:
         active_choice = Menu.select(
-            "Intervention을 선택하세요:",
+            t("prompt.change_intervention", lang),
             options=[
-                (1, "Active"),
-                (2, "Passive"),
+                (1, t("intervention.active", lang)),
+                (2, t("intervention.passive", lang)),
             ],
         )
         settings.active_mode = active_choice == 1
-        print_success(f"Intervention이 변경되었습니다.")
+        print_success(t("success.intervention_changed", lang))
 
     elif choice == 5:
         return
@@ -307,8 +319,9 @@ def main() -> int:
         run_onboarding()
 
     # Main REPL loop
+    lang = settings.language or "en"
     print_header(f"md-skill-craft v0.1.0", f"LLM: {settings.llm.upper()} | Mode: {settings.mode}")
-    print_info("Mode 1 - Generate Guide\n모드 2: Analyze project\n(Use /help for commands)")
+    print_info(t("repl.mode_info", lang))
 
     while True:
         try:
@@ -317,7 +330,7 @@ def main() -> int:
 
             # Handle empty input
             if not user_input:
-                print_info("Press Enter or type text")
+                print_info(t("misc.press_enter", lang))
                 continue
 
             # Handle /commands
@@ -332,20 +345,20 @@ def main() -> int:
                     show_cost()
                 elif cmd == "mode":
                     new_mode = Menu.select(
-                        "Select mode:",
+                        t("prompt.change_mode", lang),
                         options=[
-                            (1, "New project"),
-                            (2, "Analyze project"),
+                            (1, t("mode.generate_guide", lang)),
+                            (2, t("mode.analyze_project", lang)),
                         ],
                     )
                     settings.mode = new_mode
                     settings.save()
-                    print_success(f"Mode: {new_mode}selected")
+                    print_success(t("success.mode_changed", lang))
                 elif cmd == "exit":
-                    print_info("Exiting...")
+                    print_info(t("repl.exiting", lang))
                     return 0
                 else:
-                    print_error(f"Unknown command: {cmd}")
+                    print_error(t("repl.unknown_command", lang, cmd=cmd))
 
             else:
                 # Normal input - pass to mode handler
