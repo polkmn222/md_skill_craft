@@ -2,6 +2,7 @@
 tests/
 samples/skills/
 samples/prompts/
+task/
 
 # Build and packaging
 *.egg-info/
