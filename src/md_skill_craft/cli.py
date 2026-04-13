@@ -53,12 +53,12 @@ def get_api_key(provider: str, use_env: bool = True) -> str:
     if use_env:
         env_key = detect_env_var(provider)
         if env_key:
-            print_info(f"환경변수에서 {provider.upper()} API 키를 감지했습니다.")
+            print_info(f"Detected {provider.upper()} API key in environment")
             choice = Menu.select(
-                "사용하시겠어요?",
+                "Use this API key?",
                 options=[
-                    (1, "환경변수 사용"),
-                    (2, "새로 입력 (암호화 저장)"),
+                    (1, "Use environment variable"),
+                    (2, "Enter new key (encrypted)"),
                 ],
             )
 
@@ -68,12 +68,12 @@ def get_api_key(provider: str, use_env: bool = True) -> str:
     # Try keystore
     stored_key = KeyStore.get(provider)
     if stored_key:
-        print_info(f"저장된 {provider.upper()} API 키를 발견했습니다.")
+        print_info(f"Stored {provider.upper()} API key found")
         choice = Menu.select(
-            "사용하시겠어요?",
+            "Use this API key?",
             options=[
-                (1, "저장된 키 사용"),
-                (2, "새로 입력 (암호화 저장)"),
+                (1, "Stored 키 사용"),
+                (2, "Enter new key (encrypted)"),
             ],
         )
 
@@ -81,30 +81,30 @@ def get_api_key(provider: str, use_env: bool = True) -> str:
             return stored_key
 
     # Get new key from user
-    print_section(f"{provider.upper()} API 키 입력")
-    api_key = Menu.prompt(f"{provider.upper()} API 키를 입력하세요:")
+    print_section(f"{provider.upper()} Enter API Key")
+    api_key = Menu.prompt(f"{provider.upper()} Enter API key:")
 
     if not api_key:
         raise ValueError(f"No API key provided for {provider}")
 
     # Save to keystore
     KeyStore.save(provider, api_key)
-    print_success(f"{provider.upper()} API 키가 안전하게 저장되었습니다.")
+    print_success(f"{provider.upper()} API key saved securely")
 
     return api_key
 
 
 def run_onboarding() -> None:
     """Run first-time setup onboarding."""
-    print_header("md-skill-craft v0.1.0", "LLM 프로젝트 설정 파일 생성기")
-    print_info("처음 실행이에요. 간단한 설정을 진행할게요.\n")
+    print_header("md-skill-craft v0.1.0", "LLM Project Configuration Generator")
+    print_info("First run setup\n")
 
     # Step 1: Language
-    print_section("[1/4] 언어 선택")
+    print_section("[1/4] Language 선택")
     lang_choice = Menu.select(
-        "언어를 선택하세요 / Select language:",
+        "Select language:",
         options=[
-            (1, "한국어"),
+            (1, "Korean"),
             (2, "English"),
         ],
     )
@@ -113,11 +113,11 @@ def run_onboarding() -> None:
     # Step 2: LLM Provider
     print_section("[2/4] LLM 도구 선택")
     llm_choice = Menu.select(
-        "어떤 LLM 도구로 개발하시나요?",
+        "Which LLM provider?",
         options=[
-            (1, "Claude (Anthropic)", "CLAUDE.md 생성"),
-            (2, "GPT / Codex (OpenAI)", "AGENT.md 생성"),
-            (3, "Gemini (Google)", "GEMINI.md 생성"),
+            (1, "Claude (Anthropic)", "CLAUDE.md"),
+            (2, "GPT / Codex (OpenAI)", "AGENT.md"),
+            (3, "Gemini (Google)", "GEMINI.md"),
         ],
     )
 
@@ -136,59 +136,59 @@ def run_onboarding() -> None:
     settings.llm_model = default_model
 
     # Step 4: Mode
-    print_section("[4/4] 사용 목적 선택")
+    print_section("[4/4] Select mode:")
     mode_choice = Menu.select(
         "어떤 목적으로 사용할까요?",
         options=[
-            (1, "새 프로젝트 생성", "LLM과 대화하며 설정 파일 생성"),
-            (2, "기존 프로젝트 분석", "현재 코드를 분석하고 설정 파일 검증"),
+            (1, "New project", "Generate config files interactively"),
+            (2, "Analyze project", "Validate project configuration"),
         ],
     )
     settings.mode = mode_choice
 
     # Step 4-B: Mode 2 additional question
     if mode_choice == 2:
-        print_section("개입 방식 선택 (모드 2)")
+        print_section("Intervention method (Mode 2):")
         active_choice = Menu.select(
-            "변경 방식을 선택하세요:",
+            "Select intervention:",
             options=[
-                (1, "능동적", "제안 후 승인하면 자동 적용"),
-                (2, "수동적", "제안만 보여주고 직접 수정"),
+                (1, "Active", "Auto-apply suggestions"),
+                (2, "Passive", "Show suggestions only"),
             ],
         )
         settings.active_mode = active_choice == 1
 
     # Save settings
     settings.save()
-    print_success("✅ 설정이 저장되었습니다! (/setup으로 언제든 변경 가능합니다.)")
+    print_success("✅ Settings saved! (Use /setup to change anytime)")
 
 
 def show_help() -> None:
     """Show help information."""
-    print_header("md-skill-craft 도움말")
+    print_header("md-skill-craft Help")
 
-    print_section("내장 명령어")
-    print_option(1, "/help", "도움말 표시")
-    print_option(2, "/setup", "설정 변경 또는 확인")
-    print_option(3, "/cost", "API 사용량 및 비용 조회")
-    print_option(4, "/mode", "모드 전환 (1 ↔ 2)")
-    print_option(5, "/exit", "프로그램 종료")
+    print_section("Built-in Commands")
+    print_option(1, "/help", "Help 표시")
+    print_option(2, "/setup", "Change or view settings")
+    print_option(3, "/cost", "View API usage and costs")
+    print_option(4, "/mode", "Switch mode (1 ↔ 2)")
+    print_option(5, "/exit", "Exit program")
 
-    print_section("현재 설정")
-    print_info(f"언어: {settings.language}")
+    print_section("Current Settings")
+    print_info(f"Language: {settings.language}")
     print_info(f"LLM: {settings.llm}")
-    print_info(f"모드: {settings.mode}")
+    print_info(f"Mode: {settings.mode}")
 
     if settings.mode == 2:
-        mode_str = "능동적" if settings.active_mode else "수동적"
-        print_info(f"개입 방식: {mode_str}")
+        mode_str = "Active" if settings.active_mode else "Passive"
+        print_info(f"Intervention: {mode_str}")
 
 
 def show_cost() -> None:
     """Show API usage and costs."""
     from md_skill_craft.config.pricing import calculate_cost
 
-    print_header("📊 API 사용량 및 비용")
+    print_header("API Usage and Costs")
 
     all_usage = usage_tracker.get_all()
     total_cost = 0.0
@@ -220,40 +220,40 @@ def show_cost() -> None:
             print_info(f"  소계: ${cost:.3f}")
             print_info("")
 
-    print_section("합계")
-    print_info(f"총 비용: ${total_cost:.3f}")
-    print_info("[dim]가격: 2025년 4월 기준, 실제 청구액과 다를 수 있습니다.[/dim]")
+    print_section("Total")
+    print_info(f"Total cost: ${total_cost:.3f}")
+    print_info("[dim][Prices as of April 2025, actual billing may vary][/dim]")
 
 
 def show_setup() -> None:
     """Show setup menu to change settings."""
-    print_header("설정 변경")
+    print_header("Settings")
 
     choice = Menu.select(
-        "변경할 항목을 선택하세요:",
+        "Select what to change:",
         options=[
-            (1, "언어"),
-            (2, "LLM 및 API 키"),
-            (3, "모드 (1 ↔ 2)"),
-            (4, "개입 방식", "(모드 2만 해당)" if settings.mode == 2 else ""),
-            (5, "돌아가기"),
+            (1, "Language"),
+            (2, "LLM & API Key"),
+            (3, "Mode (1 ↔ 2)"),
+            (4, "Intervention", "(Mode 2 only)" if settings.mode == 2 else ""),
+            (5, "Back"),
         ],
     )
 
     if choice == 1:
         lang_choice = Menu.select(
-            "언어를 선택하세요:",
+            "Language를 선택하세요:",
             options=[
-                (1, "한국어"),
+                (1, "Korean"),
                 (2, "English"),
             ],
         )
         settings.language = "ko" if lang_choice == 1 else "en"
-        print_success("언어가 변경되었습니다.")
+        print_success("Language가 변경되었습니다.")
 
     elif choice == 2:
         llm_choice = Menu.select(
-            "LLM을 선택하세요:",
+            "Select LLM:",
             options=[
                 (1, "Claude (Anthropic)"),
                 (2, "GPT / Codex (OpenAI)"),
@@ -266,29 +266,29 @@ def show_setup() -> None:
         settings.llm = new_llm
         provider = ProviderFactory.create(new_llm, api_key)
         settings.llm_model = provider.available_models[0] if provider.available_models else "unknown"
-        print_success(f"LLM이 {new_llm.upper()}로 변경되었습니다.")
+        print_success(f"LLM: {new_llm.upper()}selected")
 
     elif choice == 3:
         mode_choice = Menu.select(
-            "모드를 선택하세요:",
+            "Select mode:",
             options=[
-                (1, "새 프로젝트 생성"),
-                (2, "기존 프로젝트 분석"),
+                (1, "New project"),
+                (2, "Analyze project"),
             ],
         )
         settings.mode = mode_choice
-        print_success(f"모드가 {mode_choice}로 변경되었습니다.")
+        print_success(f"Mode: {mode_choice}selected")
 
     elif choice == 4 and settings.mode == 2:
         active_choice = Menu.select(
-            "개입 방식을 선택하세요:",
+            "Intervention을 선택하세요:",
             options=[
-                (1, "능동적"),
-                (2, "수동적"),
+                (1, "Active"),
+                (2, "Passive"),
             ],
         )
         settings.active_mode = active_choice == 1
-        print_success(f"개입 방식이 변경되었습니다.")
+        print_success(f"Intervention이 변경되었습니다.")
 
     elif choice == 5:
         return
@@ -307,8 +307,8 @@ def main() -> int:
         run_onboarding()
 
     # Main REPL loop
-    print_header(f"md-skill-craft v0.1.0", f"LLM: {settings.llm.upper()} | 모드: {settings.mode}")
-    print_info("모드 1: 새 프로젝트 가이드 생성\n모드 2: 기존 프로젝트 분석\n(/help로 명령어 확인)")
+    print_header(f"md-skill-craft v0.1.0", f"LLM: {settings.llm.upper()} | Mode: {settings.mode}")
+    print_info("Mode 1 - Generate Guide\n모드 2: Analyze project\n(Use /help for commands)")
 
     while True:
         try:
@@ -317,7 +317,7 @@ def main() -> int:
 
             # Handle empty input
             if not user_input:
-                print_info("엔터를 누르거나 텍스트를 입력하세요.")
+                print_info("Press Enter or type text")
                 continue
 
             # Handle /commands
@@ -332,20 +332,20 @@ def main() -> int:
                     show_cost()
                 elif cmd == "mode":
                     new_mode = Menu.select(
-                        "모드를 선택하세요:",
+                        "Select mode:",
                         options=[
-                            (1, "새 프로젝트 생성"),
-                            (2, "기존 프로젝트 분석"),
+                            (1, "New project"),
+                            (2, "Analyze project"),
                         ],
                     )
                     settings.mode = new_mode
                     settings.save()
-                    print_success(f"모드가 {new_mode}로 변경되었습니다.")
+                    print_success(f"Mode: {new_mode}selected")
                 elif cmd == "exit":
-                    print_info("프로그램을 종료합니다.")
+                    print_info("Exiting...")
                     return 0
                 else:
-                    print_error(f"알 수 없는 명령어: {cmd}")
+                    print_error(f"Unknown command: {cmd}")
 
             else:
                 # Normal input - pass to mode handler
@@ -359,10 +359,10 @@ def main() -> int:
                     analyzer.run(Path.cwd())
 
         except KeyboardInterrupt:
-            print_info("\n프로그램을 종료합니다.")
+            print_info("\nExiting...")
             return 0
         except Exception as e:
-            print_error(f"오류 발생: {e}")
+            print_error(f"Error: {e}")
 
     return 0
 

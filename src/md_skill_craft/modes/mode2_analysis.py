@@ -160,7 +160,7 @@ class Mode2Analysis:
         Returns:
             Analysis depth (fast, standard, deep)
         """
-        print_section("분석 깊이 선택" if self.language == "ko" else "Select Analysis Depth")
+        print_section("Select Analysis Depth")
 
         prompt_text = (
             "어떤 깊이로 분석할까요?"
@@ -171,9 +171,9 @@ class Mode2Analysis:
         choice = Menu.select(
             prompt_text,
             options=[
-                (1, "빠른" if self.language == "ko" else "Fast", "README, 설정 파일만" if self.language == "ko" else "README, config files only"),
-                (2, "표준" if self.language == "ko" else "Standard", "소스 코드 상위 레벨" if self.language == "ko" else "Top-level source structure"),
-                (3, "심층" if self.language == "ko" else "Deep", "모든 소스 파일" if self.language == "ko" else "All source files"),
+                (1, "Fast", "README, config files only"),
+                (2, "Standard", "Top-level source structure"),
+                (3, "Deep", "All source files"),
             ],
         )
 
@@ -208,7 +208,7 @@ class Mode2Analysis:
             )
 
             progress_desc = (
-                "프로젝트 분석 중..." if self.language == "ko" else "Analyzing project..."
+                "Analyzing project..."
             )
 
             with progress_bar(progress_desc) as (progress, task_id):
@@ -237,7 +237,7 @@ class Mode2Analysis:
             print_error(str(e))
             return ""
         except Exception as e:
-            print_error(f"분석 오류: {e}" if self.language == "ko" else f"Analysis error: {e}")
+            print_error(f"Analysis error: {e}")
             return ""
 
     def _build_system_prompt(self) -> str:
@@ -367,16 +367,16 @@ Output analysis results in markdown format."""
             return True
 
         except Exception as e:
-            print_error(f"저장 실패: {e}" if self.language == "ko" else f"Save failed: {e}")
+            print_error(f"Save failed: {e}")
             return False
 
     def show_results(self) -> None:
         """Display analysis results."""
         if not self.analysis_results:
-            print_error("분석 결과가 없습니다." if self.language == "ko" else "No analysis results")
+            print_error("No analysis results")
             return
 
-        print_section("분석 결과" if self.language == "ko" else "Analysis Results")
+        print_section("Analysis Results")
         print_code_block(self.analysis_results, "md")
 
     def run(self, root_path: Optional[Path] = None) -> bool:
@@ -392,14 +392,14 @@ Output analysis results in markdown format."""
             root_path = Path.cwd()
 
         print_header(
-            "Mode 2: 프로젝트 분석" if self.language == "ko" else "Mode 2: Project Analysis"
+            "Mode 2: Project Analysis"
         )
 
         # Step 1: Select analysis depth
         depth = self.select_analysis_depth()
 
         # Step 2: Scan directory
-        print_info(f"스캔 중: {root_path.name}" if self.language == "ko" else f"Scanning: {root_path.name}")
+        print_info(f"Scanning: {root_path.name}")
         project_info = self._scan_directory(root_path, depth)
         project_info_str = "\n".join(
             project_info.get("key_files", []) +
@@ -416,7 +416,7 @@ Output analysis results in markdown format."""
         existing_config = self._read_existing_config(root_path)
 
         # Step 4: Analyze with LLM
-        print_info("LLM으로 분석 중..." if self.language == "ko" else "Analyzing with LLM...")
+        print_info("Analyzing with LLM...")
         results = self.analyze_with_llm(root_path, project_info_str, existing_config)
         if not results:
             return False
@@ -427,12 +427,12 @@ Output analysis results in markdown format."""
         # Step 6: Ask what to do
         if self.active_mode:
             # Active mode: ask for confirmation
-            prompt = "설정 파일을 수정할까요?" if self.language == "ko" else "Update configuration file?"
+            prompt = "Update configuration file?"
             choice = Menu.select(
                 prompt,
                 options=[
-                    (1, "예" if self.language == "ko" else "Yes"),
-                    (2, "아니오" if self.language == "ko" else "No"),
+                    (1, "Yes"),
+                    (2, "No"),
                 ],
             )
             if choice == 1:
@@ -445,14 +445,14 @@ Output analysis results in markdown format."""
                 return False
         else:
             # Passive mode: show save options
-            prompt = "어떻게 하시겠어요?" if self.language == "ko" else "What would you like to do?"
+            prompt = "What would you like to do?"
             choice = Menu.select(
                 prompt,
                 options=[
                     (1, f"{self._get_file_type()}.md.suggested로 저장" if self.language == "ko"
                         else f"Save as {self._get_file_type()}.md.suggested"),
-                    (2, "터미널 출력만" if self.language == "ko" else "Terminal output only"),
-                    (3, "넘기기" if self.language == "ko" else "Skip"),
+                    (2, "Terminal output only"),
+                    (3, "Skip"),
                 ],
             )
 

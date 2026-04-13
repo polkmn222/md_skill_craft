@@ -1,89 +1,88 @@
 @echo off
-REM md-skill-craft 자동 설치 스크립트 (Windows)
+REM md-skill-craft automated setup script (Windows)
 
 setlocal enabledelayedexpansion
 
 echo.
 echo ╔═════════════════════════════════════╗
-echo ║   md-skill-craft 자동 설치 스크립트  ║
+echo ║   md-skill-craft Setup Script       ║
 echo ╚═════════════════════════════════════╝
 echo.
 
-REM Python 버전 확인
-echo 📋 Python 버전 확인 중...
+REM Check Python version
+echo Checking Python version...
 python --version >nul 2>&1
 if errorlevel 1 (
-    echo ❌ Python을 찾을 수 없습니다.
-    echo    https://www.python.org/downloads 에서 설치하세요.
-    echo    설치 시 "Add Python to PATH" 옵션을 반드시 체크하세요.
+    echo ERROR: Python not found
+    echo Install from: https://www.python.org/downloads
+    echo Important: Check "Add Python to PATH"
     pause
     exit /b 1
 )
 
 python --version
-for /f "tokens=2" %%i in ('python --version 2^>^&1') do set PYTHON_VERSION=%%i
-echo    ✅ Python 설치 확인됨
 echo.
 
-REM 가상환경 생성
-echo 🔧 가상환경 생성 중...
+REM Create virtual environment
+echo Creating virtual environment...
 if not exist ".venv" (
     python -m venv .venv
-    echo    ✅ 가상환경 생성 완료
+    echo ✓ Virtual environment created
 ) else (
-    echo    ℹ️  기존 가상환경 발견
+    echo ✓ Virtual environment already exists
 )
 echo.
 
-REM 가상환경 활성화
-echo ⚡ 가상환경 활성화...
+REM Activate virtual environment
+echo Activating virtual environment...
 call .venv\Scripts\activate.bat
 if errorlevel 1 (
-    echo ❌ 가상환경 활성화 실패
+    echo ERROR: Failed to activate
     pause
     exit /b 1
 )
-echo    ✅ 활성화 완료
+echo ✓ Activated
 echo.
 
-REM pip 업그레이드
-echo 📦 pip 업그레이드 중...
+REM Upgrade pip
+echo Upgrading pip...
 python -m pip install --upgrade pip setuptools wheel >nul 2>&1
-echo    ✅ pip 업그레이드 완료
+echo ✓ pip upgraded
 echo.
 
-REM 의존성 설치
-echo 📥 의존성 설치 중...
+REM Install package
+echo Installing md-skill-craft...
 pip install -e . >nul 2>&1
 if errorlevel 1 (
-    echo ❌ 의존성 설치 실패
+    echo ERROR: Installation failed
     pause
     exit /b 1
 )
-echo    ✅ 의존성 설치 완료
+echo ✓ Installation complete
 echo.
 
-REM 설치 검증
-echo ✓ 설치 검증 중...
+REM Verify installation
+echo Verifying installation...
 where md-skill-craft >nul 2>&1
 if %errorlevel% equ 0 (
-    echo    ✅ md-skill-craft 명령어 사용 가능
+    echo ✓ md-skill-craft command ready
 ) else (
-    echo    ⚠️  명령어를 찾을 수 없음. 터미널을 다시 열어주세요.
+    echo ! Command not found. Restart terminal.
 )
 echo.
 
 echo ╔═════════════════════════════════════╗
-echo ║   ✅ 설치 완료!                      ║
+echo ║   ✓ Setup Complete!                ║
 echo ╚═════════════════════════════════════╝
 echo.
-echo 🚀 시작하기:
-echo    1. 가상환경이 활성화되었습니다.
+echo Next steps:
+echo   1. Install your LLM provider:
+echo      pip install -e ".[claude]"    (Claude)
+echo      pip install -e ".[openai]"    (OpenAI)
+echo      pip install -e ".[gemini]"    (Gemini)
+echo      pip install -e ".[all]"       (All LLMs)
 echo.
-echo    2. 프로그램 실행:
-echo       md-skill-craft
-echo.
-echo 📖 테스트:
-echo    pytest tests/ -v
+echo   2. Run the application:
+echo      md-skill-craft
 echo.
 pause

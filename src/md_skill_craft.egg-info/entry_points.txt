@@ -1,0 +1,2 @@
+[console_scripts]
+md-skill-craft = md_skill_craft.cli:main

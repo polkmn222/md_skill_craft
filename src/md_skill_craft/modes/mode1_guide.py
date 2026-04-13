@@ -63,11 +63,11 @@ class Mode1Guide:
         Returns:
             Project description string
         """
-        print_section("프로젝트 정보 수집" if self.language == "ko" else "Collect Project Information")
+        print_section("Collect Project Information")
 
         prompt_text = (
             "프로젝트에 대해 설명해주세요:\n"
-            "[언어, 프레임워크, 목적 등을 자유롭게 입력하세요]"
+            "[Language, 프레임워크, 목적 등을 자유롭게 입력하세요]"
             if self.language == "ko"
             else "Describe your project:\n"
             "[Language, framework, purpose, etc.]"
@@ -102,7 +102,7 @@ class Mode1Guide:
 
             # Show progress
             progress_desc = (
-                f"{file_type}.md 생성 중..." if self.language == "ko" else f"Generating {file_type}.md..."
+                f"Generating {file_type}.md..."
             )
 
             with progress_bar(progress_desc) as (progress, task_id):
@@ -133,7 +133,7 @@ class Mode1Guide:
             print_error(str(e))
             return ""
         except Exception as e:
-            print_error(f"LLM 생성 오류: {e}" if self.language == "ko" else f"LLM generation error: {e}")
+            print_error(f"LLM generation error: {e}")
             return ""
 
     def _get_file_type(self) -> str:
@@ -255,10 +255,10 @@ Output only markdown format, no explanations."""
     def show_output(self) -> None:
         """Display generated content."""
         if not self.generated_content:
-            print_error("생성된 파일이 없습니다." if self.language == "ko" else "No generated content")
+            print_error("No generated content")
             return
 
-        print_section("생성된 파일" if self.language == "ko" else "Generated File")
+        print_section("Generated File")
         print_code_block(self.generated_content, self._get_file_extension())
 
     def save_output(self, output_path: Optional[Path] = None) -> bool:
@@ -289,7 +289,7 @@ Output only markdown format, no explanations."""
             return True
 
         except Exception as e:
-            print_error(f"파일 저장 실패: {e}" if self.language == "ko" else f"Failed to save file: {e}")
+            print_error(f"Failed to save file: {e}")
             return False
 
     def save_suggested(self, output_path: Optional[Path] = None) -> bool:
@@ -320,7 +320,7 @@ Output only markdown format, no explanations."""
             return True
 
         except Exception as e:
-            print_error(f"파일 저장 실패: {e}" if self.language == "ko" else f"Failed to save file: {e}")
+            print_error(f"Failed to save file: {e}")
             return False
 
     def run(self, output_path: Optional[Path] = None) -> bool:
@@ -333,7 +333,7 @@ Output only markdown format, no explanations."""
             True if completed successfully
         """
         print_header(
-            "Mode 1: 프로젝트 가이드 생성" if self.language == "ko" else "Mode 1: Generate Project Guide"
+            "Mode 1: Generate Project Guide"
         )
 
         # Step 1: Collect project info
@@ -342,7 +342,7 @@ Output only markdown format, no explanations."""
             return False
 
         # Step 2: Generate with LLM
-        print_info("LLM과 상호작용 중..." if self.language == "ko" else "Communicating with LLM...")
+        print_info("Communicating with LLM...")
         content = self.generate_with_llm(project_description)
         if not content:
             return False
@@ -352,15 +352,15 @@ Output only markdown format, no explanations."""
 
         # Step 4: Ask what to do
         prompt = (
-            "어떻게 하시겠어요?" if self.language == "ko" else "What would you like to do?"
+            "What would you like to do?"
         )
         choice = Menu.select(
             prompt,
             options=[
-                (1, f"{self._get_file_extension()}로 저장" if self.language == "ko" else f"Save to {self._get_file_extension()}"),
-                (2, f"{self._get_file_extension()}.suggested로 저장 (미리보기)" if self.language == "ko" else f"Save as .suggested (preview)"),
-                (3, "계속 수정하기" if self.language == "ko" else "Continue editing"),
-                (4, "넘기기" if self.language == "ko" else "Skip"),
+                (1, f"Save to {self._get_file_extension()}"),
+                (2, f"Save as .suggested (preview)"),
+                (3, "Continue editing"),
+                (4, "Skip"),
             ],
         )
 
@@ -370,8 +370,8 @@ Output only markdown format, no explanations."""
             return self.save_suggested(output_path)
         elif choice == 3:
             # TODO: Implement editing loop
-            print_info("편집 기능은 추후 구현됩니다." if self.language == "ko" else "Editing feature coming soon")
+            print_info("Editing feature coming soon")
             return False
         else:  # choice == 4
-            print_info("건너뛰었습니다." if self.language == "ko" else "Skipped")
+            print_info("Skipped")
             return False
