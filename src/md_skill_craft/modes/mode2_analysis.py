@@ -6,6 +6,7 @@ import os
 
 from md_skill_craft.config.settings import settings, usage_tracker
 from md_skill_craft.config.keystore import KeyStore
+from md_skill_craft.config.localization import get_string as t
 from md_skill_craft.core.provider_factory import ProviderFactory
 from md_skill_craft.ui.formatter import (
     print_header,
@@ -162,18 +163,12 @@ class Mode2Analysis:
         """
         print_section("Select Analysis Depth")
 
-        prompt_text = (
-            "어떤 깊이로 분석할까요?"
-            if self.language == "ko"
-            else "What depth of analysis?"
-        )
-
         choice = Menu.select(
-            prompt_text,
+            t("analysis.select_depth", self.language),
             options=[
-                (1, "Fast", "README, config files only"),
-                (2, "Standard", "Top-level source structure"),
-                (3, "Deep", "All source files"),
+                (1, t("analysis.depth_fast", self.language), t("analysis.depth_fast_desc", self.language)),
+                (2, t("analysis.depth_standard", self.language), t("analysis.depth_standard_desc", self.language)),
+                (3, t("analysis.depth_deep", self.language), t("analysis.depth_deep_desc", self.language)),
             ],
         )
 
@@ -362,8 +357,7 @@ Output analysis results in markdown format."""
             with open(filepath, "w", encoding="utf-8") as f:
                 f.write(self.analysis_results)
 
-            print_success(f"{filename}이(가) 저장되었습니다." if self.language == "ko"
-                         else f"{filename} saved")
+            print_success(t("analysis.file_saved", self.language, filename=filename))
             return True
 
         except Exception as e:
@@ -373,7 +367,7 @@ Output analysis results in markdown format."""
     def show_results(self) -> None:
         """Display analysis results."""
         if not self.analysis_results:
-            print_error("No analysis results")
+            print_error(t("analysis.no_results", self.language))
             return
 
         print_section("Analysis Results")
@@ -399,7 +393,7 @@ Output analysis results in markdown format."""
         depth = self.select_analysis_depth()
 
         # Step 2: Scan directory
-        print_info(f"Scanning: {root_path.name}")
+        print_info(t("analysis.scanning", self.language, root=root_path.name))
         project_info = self._scan_directory(root_path, depth)
         project_info_str = "\n".join(
             project_info.get("key_files", []) +
@@ -408,15 +402,14 @@ Output analysis results in markdown format."""
         )
 
         if not project_info_str:
-            print_error("프로젝트 정보를 찾을 수 없습니다." if self.language == "ko"
-                       else "No project information found")
+            print_error(t("analysis.no_info_found", self.language))
             return False
 
         # Step 3: Read existing config
         existing_config = self._read_existing_config(root_path)
 
         # Step 4: Analyze with LLM
-        print_info("Analyzing with LLM...")
+        print_info(t("analysis.analyzing", self.language))
         results = self.analyze_with_llm(root_path, project_info_str, existing_config)
         if not results:
             return False
@@ -427,32 +420,28 @@ Output analysis results in markdown format."""
         # Step 6: Ask what to do
         if self.active_mode:
             # Active mode: ask for confirmation
-            prompt = "Update configuration file?"
             choice = Menu.select(
-                prompt,
+                t("analysis.update_config", self.language),
                 options=[
-                    (1, "Yes"),
-                    (2, "No"),
+                    (1, t("misc.yes", self.language)),
+                    (2, t("misc.no", self.language)),
                 ],
             )
             if choice == 1:
                 file_type = self._get_file_type()
                 # TODO: Extract and save improved config from analysis results
-                print_info("설정 파일이 업데이트되었습니다." if self.language == "ko"
-                          else "Configuration file updated")
+                print_info(t("analysis.config_updated", self.language))
                 return True
             else:
                 return False
         else:
             # Passive mode: show save options
-            prompt = "What would you like to do?"
             choice = Menu.select(
-                prompt,
+                t("analysis.what_to_do", self.language),
                 options=[
-                    (1, f"{self._get_file_type()}.md.suggested로 저장" if self.language == "ko"
-                        else f"Save as {self._get_file_type()}.md.suggested"),
-                    (2, "Terminal output only"),
-                    (3, "Skip"),
+                    (1, t("analysis.save_as_suggested", self.language, file_type=self._get_file_type())),
+                    (2, t("analysis.terminal_output_only", self.language)),
+                    (3, t("analysis.skip", self.language)),
                 ],
             )
 

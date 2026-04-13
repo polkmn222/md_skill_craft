@@ -55,9 +55,9 @@ class Menu:
                 if choice_num in numbers:
                     return choice_num
                 else:
-                    console.print(f"[red]❌ 유효하지 않은 선택입니다. {numbers}에서 선택해주세요.[/red]")
+                    console.print(f"[red]❌ Invalid selection. Please choose from {numbers}.[/red]")
             except ValueError:
-                console.print(f"[red]❌ 숫자를 입력해주세요.[/red]")
+                console.print(f"[red]❌ Please enter a number.[/red]")
 
     @staticmethod
     def select_multiple(
@@ -73,7 +73,7 @@ class Menu:
         Returns:
             List of selected option numbers
         """
-        console.print(f"\n{prompt} [dim](쉼표로 구분)[/dim]")
+        console.print(f"\n{prompt} [dim](comma-separated)[/dim]")
 
         if options:
             for opt in options:
@@ -98,9 +98,9 @@ class Menu:
                 if all(c in numbers for c in choices):
                     return choices
                 else:
-                    console.print(f"[red]❌ 유효하지 않은 선택입니다.[/red]")
+                    console.print(f"[red]❌ Invalid selection.[/red]")
             except ValueError:
-                console.print(f"[red]❌ 숫자를 쉼표로 구분하여 입력해주세요.[/red]")
+                console.print(f"[red]❌ Please enter numbers separated by commas.[/red]")
 
     @staticmethod
     def confirm(prompt: str, default: bool = True) -> bool:
@@ -119,12 +119,12 @@ class Menu:
 
             if not response:
                 return default
-            elif response in ("y", "yes", "예"):
+            elif response in ("y", "yes"):
                 return True
-            elif response in ("n", "no", "아니오"):
+            elif response in ("n", "no"):
                 return False
             else:
-                console.print("[red]❌ y 또는 n 으로 입력해주세요.[/red]")
+                console.print("[red]❌ Please enter y or n.[/red]")
 
     @staticmethod
     def prompt(
@@ -146,7 +146,7 @@ class Menu:
             response = RichPrompt.ask(f"\n{prompt_text}", default=default, console=console)
 
             if validate_fn and not validate_fn(response):
-                console.print("[red]❌ 유효하지 않은 입력입니다.[/red]")
+                console.print("[red]❌ Invalid input.[/red]")
                 continue
 
             return response
