@@ -1,0 +1,122 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "md-skill-craft"
+version = "0.1.0"
+description = "LLM-based project configuration file generator (CLAUDE.md, AGENT.md, GEMINI.md)"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {text = "MIT"}
+authors = [{name = "Claude Code", email = "code@anthropic.com"}]
+keywords = ["llm", "claude", "gpt", "gemini", "project-setup", "cli"]
+
+dependencies = [
+    "anthropic>=0.49.0",           # Claude API
+    "openai>=1.50.0",              # GPT API
+    "google-genai>=1.0.0",         # Gemini API (new SDK)
+    "rich>=13.0.0",                # Terminal UI
+    "keyring>=24.0.0",             # OS keystore for API keys
+    "platformdirs>=4.0.0",         # Cross-platform config paths
+]
+
+[project.scripts]
+md-skill-craft = "md_skill_craft.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-mock>=3.12.0",
+    "ruff>=0.9.0",
+    "mypy>=1.10.0",
+    "types-python-dateutil",
+]
+
+[project.urls]
+Repository = "https://github.com/anthropics/claude-code-trainer"
+Issues = "https://github.com/anthropics/claude-code-trainer/issues"
+
+[tool.setuptools]
+packages = ["md_skill_craft"]
+package-dir = {"" = "src"}
+
+# ===== Ruff =====
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "*.egg-info",
+    ".pytest_cache",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # Pyflakes
+    "I",     # isort
+    "UP",    # pyupgrade (use modern Python syntax)
+    "ANN",   # flake8-annotations (type hints)
+    "ASYNC", # flake8-async
+    "C4",    # flake8-comprehensions
+]
+ignore = [
+    "ANN101",  # Missing type annotation for `self` in method (standard)
+    "ANN102",  # Missing type annotation for `cls` in classmethod
+    "E501",    # Line too long (handled by formatter)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["md_skill_craft"]
+lines-between-types = 1
+
+# ===== MyPy =====
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = false
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[[tool.mypy.overrides]]
+module = "google.genai.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "keyring.*"
+ignore_missing_imports = true
+
+# ===== Pytest =====
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = "-v --strict-markers"
+markers = [
+    "slow: marks tests as slow",
+    "integration: marks tests as integration tests",
+]
+
+# ===== Coverage =====
+[tool.coverage.run]
+source = ["md_skill_craft"]
+omit = ["*/tests/*", "*/test_*.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]

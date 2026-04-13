@@ -1,0 +1,19 @@
+# md-skill-craft dependencies
+# Core dependencies
+anthropic>=0.49.0
+openai>=1.50.0
+google-genai>=1.0.0
+rich>=13.0.0
+keyring>=24.0.0
+platformdirs>=4.0.0
+
+# Development dependencies (optional)
+# pytest>=8.0.0
+# pytest-asyncio>=0.23.0
+# pytest-mock>=3.12.0
+# ruff>=0.9.0
+# mypy>=1.10.0
+# types-python-dateutil
+
+# To install all dependencies including dev tools:
+# pip install -e ".[dev]"

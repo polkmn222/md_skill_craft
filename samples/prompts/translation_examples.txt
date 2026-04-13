@@ -1,0 +1,38 @@
+# Translation Examples
+
+## Korean to English - Natural Style
+
+안녕하세요, 저는 파이썬 개발자입니다.
+→ Hello, I'm a Python developer.
+
+이 함수를 리팩토링 해주세요.
+→ Please refactor this function.
+
+## Korean to English - Formal Style
+
+회의에 참석해주셔서 감사합니다.
+→ Thank you for attending the meeting.
+
+지연되어 죄송합니다.
+→ I apologize for the delay.
+
+## Korean to English - Technical Style
+
+메모리 누수를 해결했습니다.
+→ Fixed memory leak.
+
+버퀘 큐를 사용하여 성능을 개선했습니다.
+→ Improved performance using priority queue.
+
+## English to Korean - Natural Style
+
+Good morning! How are you?
+→ 좋은 아침입니다! 어떻게 지내세요?
+
+## English to Korean - Technical Style
+
+Implement a binary search algorithm.
+→ 이진 검색 알고리즘을 구현하세요.
+
+Optimize the database queries.
+→ 데이터베이스 쿼리를 최적화하세요.
